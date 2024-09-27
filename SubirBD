@@ -1,0 +1,1 @@
+$ mysqldump -h localhost -u root -p HomEconomy > archivo.sql
