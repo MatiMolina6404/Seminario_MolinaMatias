@@ -1,0 +1,21 @@
+DELETE FROM movimientos;
+DELETE FROM ingresos;
+DELETE FROM gastos;
+DELETE FROM familia;
+DELETE FROM contactarEquipo;
+DELETE FROM movimientosahorros;
+DELETE FROM ahorros;
+DELETE FROM informes;
+DELETE FROM categorias;
+DELETE FROM usuario;
+
+SELECT * FROM movimientos;
+SELECT * FROM ingresos;
+SELECT * FROM gastos;
+SELECT * FROM familia;
+SELECT * FROM contactarEquipo;
+SELECT * FROM movimientosahorros;
+SELECT * FROM ahorros;
+SELECT * FROM informes;
+SELECT * FROM categorias;
+SELECT * FROM usuario;

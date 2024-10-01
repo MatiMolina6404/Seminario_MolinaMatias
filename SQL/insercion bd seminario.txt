@@ -1,0 +1,45 @@
+INSERT INTO usuario
+values 
+(01, 'matias', 'mati-molina04');
+
+INSERT INTO familia
+values
+(01, 01, 'amaia', 'hermana'),
+(02, 01, 'gonzalo', 'padre'),
+(03, 01, 'carina', 'madre');
+
+INSERT INTO categorias
+values
+(01,'gasto','transporte','gastos en combustible, repuestos, etc'),
+(02,'ingreso','sueldo','ingreso mensual por sueldo'),
+(03,'gasto','servicios','internet, luz, gas, agua, etc,');
+
+INSERT INTO ingresos
+values
+(01,01,null,02,50000,'2024-09-18','sueldo agosto',null);
+
+INSERT INTO gastos
+values
+(01,01,03,01,15000,'2024-09-16','combustible auto',null);
+
+INSERT INTO movimientos
+values
+(01,null,01,15000,'2024-09-16',15000,0),
+(02,01,null,50000,'2024-09-18',0,50000);
+
+INSERT INTO contactarequipo
+values
+(01,01,'fallo al ingresar dinero','2024-09-14');
+
+INSERT INTO informes
+values
+(01,'informe sobre gastos','2024-09-10','2024-09-18'),
+(02,'informe sobre ingresos','2024-09-10','2024-09-18');
+
+INSERT INTO ahorros
+values
+(01,25000,'2024-09-18');
+
+INSERT INTO movimientosahorros
+values
+(01,01,01,'ingreso',25000,'2024-09-18');
