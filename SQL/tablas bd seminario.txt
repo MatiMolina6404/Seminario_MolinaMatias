@@ -1,0 +1,161 @@
+CREATE DATABASE `homeconomydb`;
+
+CREATE TABLE `homeconomydb`.`usuario` (
+  `idUsuario` INT NOT NULL,
+  `nombre` VARCHAR(45) NOT NULL,
+  `contraseña` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idUsuario`));
+
+CREATE TABLE `familia` (
+  `idFamilia` int NOT NULL,
+  `idUsuario` int NOT NULL,
+  `Nombre` varchar(45) NOT NULL,
+  `Relacion` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`idFamilia`),
+  KEY `idUsuario_idx` (`idUsuario`),
+  CONSTRAINT `idUsuarioF` FOREIGN KEY (`idUsuario`) REFERENCES `usuario` (`idUsuario`)
+); 
+
+CREATE TABLE `homeconomydb`.`categorias` (
+  `idCategoria` INT NOT NULL,
+  `tipo` VARCHAR(45) NOT NULL,
+  `nombre` VARCHAR(45) NOT NULL,
+  `descripcion` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idCategoria`));
+
+CREATE TABLE `homeconomydb`.`gastos` (
+  `idGasto` INT NOT NULL,
+  `idUsuarioG` INT NOT NULL,
+  `idFamiliarG` INT NULL,
+  `idCategoriaG` INT NULL,
+  `cantidad` INT NOT NULL,
+  `fecha` DATE NOT NULL,
+  `comentario` VARCHAR(45) NULL,
+  `comprobante` VARCHAR(45) NULL,
+  PRIMARY KEY (`idGasto`),
+  INDEX `idFamiliar_idx` (`idFamiliarG` ASC) VISIBLE,
+  INDEX `idCategoria_idx` (`idCategoriaG` ASC) VISIBLE,
+  INDEX `idUsuario_idx` (`idUsuarioG` ASC) VISIBLE,
+  CONSTRAINT `idFamiliarG`
+    FOREIGN KEY (`idFamiliarG`)
+    REFERENCES `homeconomydb`.`familia` (`idFamilia`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `idCategoriaG`
+    FOREIGN KEY (`idCategoriaG`)
+    REFERENCES `homeconomydb`.`categorias` (`idCategoria`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `idUsuarioG`
+    FOREIGN KEY (`idUsuarioG`)
+    REFERENCES `homeconomydb`.`usuario` (`idUsuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `homeconomydb`.`ingresos` (
+  `idIngreso` INT NOT NULL,
+  `idUsuarioI` INT NOT NULL,
+  `idFamiliarI` INT NULL,
+  `idCategoriaI` INT NULL,
+  `cantidad` INT NOT NULL,
+  `fecha` DATE NOT NULL,
+  `comentario` VARCHAR(45) NULL,
+  `comprobante` VARCHAR(45) NULL,
+  PRIMARY KEY (`idIngreso`),
+  INDEX `idUsuarioI_idx` (`idUsuarioI` ASC) VISIBLE,
+  INDEX `idFamiliar_idx` (`idFamiliarI` ASC) VISIBLE,
+  INDEX `idCategoria_idx` (`idCategoriaI` ASC) VISIBLE,
+  CONSTRAINT `idUsuarioI`
+    FOREIGN KEY (`idUsuarioI`)
+    REFERENCES `homeconomydb`.`usuario` (`idUsuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `idFamiliarI`
+    FOREIGN KEY (`idFamiliarI`)
+    REFERENCES `homeconomydb`.`familia` (`idFamilia`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `idCategoriaI`
+    FOREIGN KEY (`idCategoriaI`)
+    REFERENCES `homeconomydb`.`categorias` (`idCategoria`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `homeconomydb`.`movimientos` (
+  `idMovimiento` INT NOT NULL,
+  `idIngreso` INT NULL,
+  `idGasto` INT NULL,
+  `cantidad` INT NOT NULL,
+  `fecha` DATE NOT NULL,
+  `cantidadAnterior` INT NOT NULL,
+  `cantidadPosterior` INT NOT NULL,
+  PRIMARY KEY (`idMovimiento`),
+  INDEX `idIngreso_idx` (`idIngreso` ASC) VISIBLE,
+  INDEX `idGasto_idx` (`idGasto` ASC) VISIBLE,
+  CONSTRAINT `idIngreso`
+    FOREIGN KEY (`idIngreso`)
+    REFERENCES `homeconomydb`.`ingresos` (`idIngreso`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `idGasto`
+    FOREIGN KEY (`idGasto`)
+    REFERENCES `homeconomydb`.`gastos` (`idGasto`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `homeconomydb`.`informes` (
+  `idInforme` INT NOT NULL,
+  `tipoInforme` VARCHAR(45) NOT NULL,
+  `fechaInicial` DATE NOT NULL,
+  `fechaFinal` DATE NOT NULL,
+  `idCategoria` INT NULL,
+  `idFamiliar` INT NULL,
+  PRIMARY KEY (`idInforme`),
+  INDEX `idFamiliaInf_idx` (`idFamiliar` ASC) VISIBLE,
+  INDEX `idCategoriaInf_idx` (`idCategoria` ASC) VISIBLE,
+  CONSTRAINT `idFamiliaInf`
+    FOREIGN KEY (`idFamiliar`)
+    REFERENCES `homeconomydb`.`familia` (`idFamilia`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `idCategoriaInf`
+    FOREIGN KEY (`idCategoria`)
+    REFERENCES `homeconomydb`.`categorias` (`idCategoria`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `movimientosahorros` (
+  `idMovimiento` int NOT NULL,
+  `idUsuarioMov` int NOT NULL,
+  `idAhorro` int NOT NULL,
+  `tipoMovimiento` varchar(45) NOT NULL,
+  `cantidad` int NOT NULL,
+  `fecha` date NOT NULL,
+  PRIMARY KEY (`idMovimiento`),
+  KEY `idUsuarioMov_idx` (`idUsuarioMov`),
+  KEY `idAhorro_idx` (`idAhorro`),
+  CONSTRAINT `idAhorro` FOREIGN KEY (`idAhorro`) REFERENCES `ahorros` (`idAhorro`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+  CONSTRAINT `idUsuarioMov` FOREIGN KEY (`idUsuarioMov`) REFERENCES `usuario` (`idUsuario`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION);
+
+CREATE TABLE `homeconomydb`.`ahorros` (
+  `idAhorro` INT NOT NULL,
+  `cantidadAhorrada` INT NOT NULL,
+  `ultimoMovimiento` DATE NOT NULL,
+  PRIMARY KEY (`idAhorro`));
+
+CREATE TABLE `homeconomydb`.`contactarequipo` (
+  `idMensaje` INT NOT NULL,
+  `idUsuarioM` INT NOT NULL,
+  `mensaje` VARCHAR(45) NOT NULL,
+  `fecha` DATE NOT NULL,
+  PRIMARY KEY (`idMensaje`),
+  INDEX `idUsuarioM_idx` (`idUsuarioM` ASC) VISIBLE,
+  CONSTRAINT `idUsuarioM`
+    FOREIGN KEY (`idUsuarioM`)
+    REFERENCES `homeconomydb`.`usuario` (`idUsuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
