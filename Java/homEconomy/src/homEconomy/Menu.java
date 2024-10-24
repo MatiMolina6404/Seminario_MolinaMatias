@@ -206,7 +206,9 @@ public class Menu {
 			} 
 			
 			} catch (InputMismatchException exc1) {
-	    	System.out.println("Ingrese una opcion valida (en numero)");
+			System.out.println();
+	    	System.out.println("Ingrese un valor numerico correcto");
+	    	System.out.println();
 	    	sc.nextLine();
 			}		
 		
