@@ -46,6 +46,7 @@ public class Main {
 	                 break;
 	            }
 	    	 } catch (InputMismatchException e) {
+	    		 	System.out.println();
 	    			System.out.println("Ingrese un valor numerico correcto");
 	    			sc.nextLine();
 	    		}

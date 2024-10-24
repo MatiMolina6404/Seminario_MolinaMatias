@@ -63,7 +63,7 @@ public class Ahorros {
 			System.out.println("Presione enter para continuar");
 			sc.nextLine();
 	        idAhorro++;
-	        
+	        return;
 	        } catch (InputMismatchException exc1) {
 	        	System.out.println("Ingrese los datos correctamente");
 	        	sc.nextLine();
