@@ -1,38 +1,39 @@
 package registros;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import conexionBD.GastosBD;
+import conexionBD.IngresosBD;
+import usuario.Usuario;
+
 public class Informes {
-	
+
 	int idInforme;
 	String fechaInicial;
 	String fechaFinal;
-	
-	/* Metodo para solicitar informes de Ingresos
-	 * A aplicar con consultas a la base de datos
-	 */
-	public void SolicitarInformeIngresos() {
+	IngresosBD ingBD = new IngresosBD();
+	GastosBD gasBD = new GastosBD();
+
+	// Metodo para solicitar informes de Ingresos
+	public void SolicitarInformeIngresos(Connection conexion) {
 		System.out.println("\tInforme de Ingresos");
-		System.out.println("Fecha inicial: ");
-		System.out.println("Fecha final: ");
 		System.out.println();
+		try {
+			ingBD.mostrarIngresos(conexion);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
-	
-	/* Metodo para solicitar informes de Gastos
-	 * A aplicar con consultas a la base de datos
-	 */
-	public void SolicitarInformeGastos() {
+
+	// Metodo para solicitar informes de Gastos
+	public void SolicitarInformeGastos(Connection conexion, Usuario usu) {
 		System.out.println("\tInforme de Gastos");
-		System.out.println("Fecha inicial: ");
-		System.out.println("Fecha final: ");
 		System.out.println();
-	}
-	
-	/* Metodo para solicitar informes de Ahorros
-	 * A aplicar con consultas a la base de datos
-	 */
-	public void SolicitarInformeAhorros() {
-		System.out.println("\tInforme de Ahorros");
-		System.out.println("Fecha inicial: ");
-		System.out.println("Fecha final: ");
-		System.out.println();
+		try {
+			gasBD.mostrarGastos(conexion, usu);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }
