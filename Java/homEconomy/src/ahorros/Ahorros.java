@@ -1,178 +1,211 @@
 package ahorros;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.InputMismatchException;
 import java.util.Scanner;
+
+import conexionBD.AhorrosBD;
+import conexionBD.UsuarioBD;
 import usuario.Usuario;
 
 public class Ahorros {
-	Scanner sc = new Scanner (System.in);
-	ArrayList<Integer> idMovimientoAhorro = new ArrayList<>();
-	ArrayList<String> concepto = new ArrayList<>();
-	ArrayList<Integer> cantidad = new ArrayList<>();
-	ArrayList<String> tipoMovimiento = new ArrayList<>();
-	ArrayList<String> ultimoMovimiento = new ArrayList<>();
-	ArrayList<String> fechaHora = new ArrayList<>();
-	public int montoAhorro;
+	Scanner sc = new Scanner(System.in);
+	int idMovimientoAhorro;
+	String concepto;
+	String tipoMovimiento;
+	String ultimoMovimiento;
+	int cantidad;
+	int montoAhorro;
 	int idMovimiento;
+	int cantReservada;
 	int idAhorro;
-	public int cantReservada;
-	
-	// Metodo para definir el apartado de ahorro
-	public void definirAhorros(Usuario usuario) {
-		
-		if (concepto.isEmpty()) {
-		// Obtencion y formateo de fecha
-	    LocalDateTime fechaActual = LocalDateTime.now();
-	    DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-	    String fechaFormateada = fechaActual.format(formato);
-	    fechaHora.add(fechaFormateada);
-	        
-	    try { //Manejo de excepcion al ingresar un caracter erroneo
 
-	        System.out.println("Ingrese el concepto del ahorro a reservar");
-	        String conc = sc.nextLine();
-	        
-	        System.out.println("Ingrese el valor a reservar:");
-	        montoAhorro = sc.nextInt();
-	        if (usuario.DineroInicial()< montoAhorro) {
-	        	System.out.println("Transaccion cancelada:");
-	        	System.out.println("No se permite reservar mas dinero que el disponible en la cuenta");
-	        	sc.nextLine();
-	        	return; //Cancela el ahorro
-	        	}
-	        
-	        /* El monto y el concepto se agregan al final por si 
-	         * ocurre un error en la carga de los datos.
-	         */
-	        concepto.add(conc);
-	        cantReservada = montoAhorro;
-	        usuario.setDineroInicial(usuario.DineroInicial() - montoAhorro);
-	        sc.nextLine(); 
-	        
-	        // Mostrar resumen ahorro registrado
-	        System.out.println();
-	        System.out.println("\tResumen definicion de Ahorro");
-	        System.out.println("Concepto: " + concepto.get(idAhorro));
-	        System.out.println("Ahorro ID: " + idAhorro); 
-	        System.out.println("Fecha: " + fechaHora.get(idAhorro)); 
-	        System.out.println("Cantidad reservada: $" + cantReservada);
-	        System.out.println();
-			System.out.println("Presione enter para continuar");
+	// Obtencion y formateo de la fecha
+	LocalDateTime fechaActual = LocalDateTime.now();
+	DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	String fechaHora = fechaActual.format(formato);
+
+	// Metodo para definir el apartado de ahorro
+	public void definirAhorros(Usuario usuario, Connection conexion, AhorrosBD ahorrosBD) throws SQLException {
+		// Intenta obtener un ahorro ya definido para el usuario
+		Ahorros ahorroExistente = ahorrosBD.obtenerAhorro(usuario.getIdUsuario(), conexion);
+
+		if (ahorroExistente.Concepto() != null) {
+			System.out.println("Ya existe un ahorro definido con el concepto: " + ahorroExistente.Concepto());
+			System.out.println("Monto reservado: $" + ahorroExistente.CantReservada());
+			return;
+		}
+
+		System.out.println("Ingrese el concepto del ahorro a reservar");
+		this.concepto = sc.nextLine();
+		System.out.println("Ingrese el valor a reservar:");
+		this.montoAhorro = sc.nextInt();
+
+		if (usuario.DineroInicial() < montoAhorro) {
+			System.out.println("Transaccion cancelada: No se permite reservar mas dinero del disponible.");
 			sc.nextLine();
-	        idAhorro++;
-	        return;
-	        } catch (InputMismatchException exc1) {
-	        	System.out.println("Ingrese los datos correctamente");
-	        	sc.nextLine();
-	        }
-	    } 	// Mensaje temporal, hasta que se implemente la base de datos
-			System.out.println("Ya ha definido un ahorro");
+			return;
+		}
+
+		this.cantReservada = montoAhorro; // Asigna el monto reservado
+		usuario.setDineroInicial(usuario.DineroInicial() - montoAhorro);
+
+		// Resumen del ahorro
+		System.out.println("\tResumen de Ahorro");
+		System.out.println("Concepto: " + this.concepto);
+		System.out.println("Fecha: " + fechaHora);
+		System.out.println("Cantidad reservada: $" + this.cantReservada);
+		sc.nextLine();
+
+		ahorrosBD.insertarAhorro(this, conexion, usuario.getIdUsuario());
 	}
-	
-	
-	// Metodo para ingresar un monto a la cantidad ahorrada
-	public void ingresarAhorros(Usuario usuario) {
-		if (concepto.isEmpty()) {
+
+	// Metodo para ingresar un monto a la cantidad reservada
+	public void ingresarAhorros(Usuario usuario, Connection conexion, AhorrosBD ahorrosBD) throws SQLException {
+		// Obtener el ahorro desde la base de datos
+		Ahorros ahorroExistente = ahorrosBD.obtenerAhorro(usuario.getIdUsuario(), conexion);
+
+		// Verificar si existe un concepto en la base de datos
+		if (ahorroExistente.Concepto() == null) {
 			System.out.println("Defina un Ahorro para comenzar");
 			return;
 		}
-		
-		// Obtencion y formateo de la fecha
-		LocalDateTime fechaActual = LocalDateTime.now();
-        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-        String fechaFormateada = fechaActual.format(formato);
-        ultimoMovimiento.add(fechaFormateada);
-        
-        idMovimientoAhorro.add(idMovimiento);
-        tipoMovimiento.add("Ingreso");
-        
-        System.out.println("Ingrese el valor a ingresar en ahorros:");
-        int montoIngresoAhorro = sc.nextInt();
-        if (usuario.DineroInicial()< montoIngresoAhorro) {
-        	System.out.println("Transaccion cancelada:");
-        	System.out.println("No se permite reservar mas dinero que el disponible en la cuenta");
-        	sc.nextLine();
-        	return; //Cancela el ingreso a ahorros
-        }
-        cantidad.add(montoIngresoAhorro);
-        cantReservada += montoIngresoAhorro;
-        usuario.setDineroInicial(usuario.DineroInicial() - montoIngresoAhorro);
-        
-        sc.nextLine(); 
-        
-        // Mostrar resumen del ingreso
-        System.out.println("\tResumen del ingreso");
-        System.out.println("Movimiento ID: " + idMovimientoAhorro.get(idMovimiento));
-        System.out.println("Fecha: " + fechaFormateada);
-        System.out.println("Cantidad ingresada: $" + cantidad.get(idMovimiento));
-        System.out.println("Cantidad total reservada: $" + cantReservada);
-        System.out.println();
-		System.out.println("Presione enter para continuar");
+
+		// Asignar el idAhorro obtenido
+		this.idAhorro = ahorroExistente.getIdAhorro();
+
+		tipoMovimiento = "Ingreso";
+
+		System.out.println("Ingrese el valor a ingresar en ahorros:");
+		int montoIngresoAhorro = sc.nextInt();
+		if (usuario.DineroInicial() < montoIngresoAhorro) {
+			System.out.println("Transaccion cancelada:");
+			System.out.println("No se permite reservar mas dinero que el disponible en la cuenta");
+			sc.nextLine();
+			return; // Cancela el ingreso a ahorros
+		}
+		if (montoIngresoAhorro < 0) {
+			System.out.println("Transaccion cancelada:");
+			System.out.println("No se permiten numeros negativos");
+			sc.nextLine();
+			return; // Cancela el ingreso a ahorros
+		}
+
+		// Actualizar los valores de cantidad y cantReservada
+		cantidad = montoIngresoAhorro;
+		cantReservada = ahorroExistente.CantReservada() + montoIngresoAhorro;
+		usuario.setDineroInicial(usuario.DineroInicial() - montoIngresoAhorro);
 		sc.nextLine();
-        
-		idMovimiento++;
-	}
-	
-	
-	// Metodo para retirar un monto de la cantidad ahorrada
-	public void retirarAhorros(Usuario usuario) {
-		if (concepto.isEmpty()) {
-			System.out.println("Defina un Ahorro para comenzar");
-			return;
-		} 
-		// Obtencion y formateo de la fecha
-		LocalDateTime fechaActual = LocalDateTime.now();
-        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-        String fechaFormateada = fechaActual.format(formato);
-        ultimoMovimiento.add(fechaFormateada);
-        
-        idMovimientoAhorro.add(idMovimiento);
-        tipoMovimiento.add("Retiro");
-        
-        System.out.println("Ingrese el valor a retirar de ahorros:");
-        int montoRetiroAhorro = sc.nextInt();
-        if (montoRetiroAhorro > cantReservada) {
-        	System.out.println("Transaccion cancelada:");
-        	System.out.println("No se permite retirar mas dinero que el disponible en las reservas");
-        	sc.nextLine();
-        	return; //Cancela el retiro de ahorros
-        }
-        cantidad.add(montoRetiroAhorro);
-        cantReservada -= montoRetiroAhorro;
-        usuario.setDineroInicial(usuario.DineroInicial() + montoRetiroAhorro);
-        sc.nextLine();
-        
-        // Mostrar resumen del retiro
-        System.out.println("\tResumen del retiro");
-        System.out.println("Movimiento ID: " + idMovimientoAhorro.get(idMovimiento));
-        System.out.println("Fecha: " + fechaFormateada);
-        System.out.println("Cantidad retirada: $" + cantidad.get(idMovimiento));
-        System.out.println("Cantidad total reservada: $" + cantReservada);
-        System.out.println();
-		System.out.println("Presione enter para continuar");
-		sc.nextLine();
-		
-		idMovimiento++;
+
+		// Mostrar resumen del ingreso
+		System.out.println("\tResumen del ingreso");
+		System.out.println("Concepto: " + ahorroExistente.Concepto());
+		System.out.println("Movimiento ID: " + this.idMovimiento);
+		System.out.println("Fecha: " + fechaHora);
+		System.out.println("Cantidad ingresada: $" + cantidad);
+		System.out.println("Cantidad total reservada: $" + cantReservada);
+
+		// Insertar el movimiento en la base de datos
+		ahorrosBD.insertarMovimientoAhorro(this, conexion, usuario.getIdUsuario(), idAhorro);
+		ahorrosBD.actualizarCantidadAhorro(usuario.getIdUsuario(), cantReservada, conexion);
+
 	}
 
-	
-	//Getters
-	public ArrayList<Integer> getIdMovimientoAhorro() {
-		return idMovimientoAhorro;
+	public void retirarAhorros(Usuario usuario, Connection conexion, AhorrosBD ahorrosBD, UsuarioBD usuarioBD) throws SQLException {
+		// Obtener el ahorro desde la base de datos
+		Ahorros ahorroExistente = ahorrosBD.obtenerAhorro(usuario.getIdUsuario(), conexion);
+
+		// Verificar si existe un concepto en la base de datos
+		if (ahorroExistente == null || ahorroExistente.Concepto() == null) {
+			System.out.println("Defina un Ahorro para comenzar");
+			return;
+		}
+
+		// Asignar la cantidad reservada obtenida
+		this.cantReservada = ahorroExistente.CantReservada();
+
+		// Asignar el idAhorro obtenido
+		this.idAhorro = ahorroExistente.getIdAhorro();
+		
+		tipoMovimiento = "Retiro";
+
+		System.out.println("Ingrese el valor a retirar de los ahorros:");
+		int montoRetiroAhorro = sc.nextInt();
+
+		if (montoRetiroAhorro > cantReservada) {
+			System.out.println("Transaccion cancelada:");
+			System.out.println("No se permite retirar mas dinero que el reservado");
+			sc.nextLine();
+			sc.nextLine();
+			return;
+		}
+		if (montoRetiroAhorro < 0) {
+			System.out.println("Transaccion cancelada: No se permiten numeros negativos");
+			sc.nextLine();
+			return;
+		}
+
+		// Actualizar los valores de cantidad y cantReservada
+		cantidad = montoRetiroAhorro;
+		cantReservada = ahorroExistente.CantReservada() - montoRetiroAhorro;
+		usuario.setDineroInicial(usuario.DineroInicial() + montoRetiroAhorro);
+		sc.nextLine();
+
+		// Mostrar resumen del retiro
+		System.out.println("\tResumen del retiro");
+		System.out.println("Concepto: " + ahorroExistente.Concepto());
+		System.out.println("Movimiento ID: " + this.idMovimiento);
+		System.out.println("Fecha: " + fechaHora);
+		System.out.println("Cantidad retirada: $" + cantidad);
+		System.out.println("Cantidad total reservada: $" + cantReservada);
+
+		// Insertar el movimiento en la base de datos y actualizar el ahorro
+		ahorrosBD.insertarMovimientoAhorro(this, conexion, usuario.getIdUsuario(), idAhorro);
+		ahorrosBD.actualizarCantidadAhorro(usuario.getIdUsuario(), cantReservada, conexion);
+		usuarioBD.actualizarBalance(conexion, usuario.getIdUsuario(), usuario.DineroInicial());
 	}
-	public ArrayList<Integer> getCantidad() {
+
+	// Getters y Setters
+	public int Cantidad() {
 		return cantidad;
 	}
-	public ArrayList<String> getTipoMovimiento() {
+
+	public int getIdAhorro() {
+		return idAhorro;
+	}
+
+	public int CantReservada() {
+		return cantReservada;
+	}
+
+	public String TipoMovimiento() {
 		return tipoMovimiento;
 	}
-	public ArrayList<String> getUltimoMovimiento() {
-		return ultimoMovimiento;
+
+	public String FechaHora() {
+		return fechaHora;
 	}
-	public ArrayList<String> getConcepto(){
+
+	public String Concepto() {
 		return concepto;
 	}
+
+	public void setConcepto(String concepto) {
+		this.concepto = concepto;
+	}
+
+	public void setCantReservada(int cantReservada) {
+		this.cantReservada = cantReservada;
+	}
+
+	public void setIdAhorro(int idAhorro) {
+		this.idAhorro = idAhorro;
+	}
+
+	public void setidMovimiento(int idMovimiento) {
+		this.idMovimiento = idMovimiento;
+	}
+
 }

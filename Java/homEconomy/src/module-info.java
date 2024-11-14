@@ -6,4 +6,6 @@
  *
  */
 module homEconomy {
+	requires java.sql;
+
 }
